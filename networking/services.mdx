@@ -1,0 +1,293 @@
+---
+title: Services
+description: Expose your deployments to the network with Kubernetes services.
+---
+
+Services provide network access to your deployments. They create stable network endpoints that route traffic to your pods, even as pods are created and destroyed during updates.
+
+## What is a Service?
+
+In Kubernetes, pods have ephemeral IP addresses that change when pods restart. A Service provides:
+
+- A stable DNS name and IP address
+- Load balancing across multiple pod replicas
+- Network access control (internal vs. external)
+
+## Service Types
+
+Orchard supports three types of services:
+
+<CardGroup cols={3}>
+  <Card title="Internal" icon="lock">
+    Accessible only within the cluster
+  </Card>
+  <Card title="External" icon="globe">
+    Publicly accessible via LoadBalancer
+  </Card>
+  <Card title="Ingress" icon="route">
+    HTTP(S) routing with custom domains
+  </Card>
+</CardGroup>
+
+### Internal (ClusterIP)
+
+Internal services are only accessible from within the Kubernetes cluster. Use these for:
+
+- Databases that shouldn't be public
+- Internal APIs between microservices
+- Backend services accessed by frontends
+
+**Internal URL format:**
+```
+{service-name}.{namespace}.svc.cluster.local:{port}
+```
+
+**Example:**
+```
+postgres.acme-prod-api.svc.cluster.local:5432
+```
+
+### External (LoadBalancer)
+
+External services are accessible from the internet via a public IP address. Use these for:
+
+- APIs that need direct external access
+- Services without a custom domain
+- Quick testing and development
+
+<Note>
+  External services get a public IP assigned by the cluster. For custom domains with HTTPS, use an Ingress instead.
+</Note>
+
+### Ingress
+
+Ingresses provide HTTP(S) routing with custom domains, TLS certificates, and path-based routing. See [Ingresses](/networking/ingresses) for details.
+
+## Creating a Service
+
+<Steps>
+  <Step title="Open your deployment">
+    Navigate to the deployment you want to expose.
+  </Step>
+  <Step title="Go to Networking tab">
+    Click on the **Networking** tab.
+  </Step>
+  <Step title="Click 'Add Service'">
+    Click **Add Service** to create a new service.
+  </Step>
+  <Step title="Configure the service">
+    | Field | Description |
+    |-------|-------------|
+    | **Name** | Unique name for the service |
+    | **Type** | Internal or External |
+    | **Port** | The port to expose |
+    | **Target Port** | The port your container listens on |
+  </Step>
+  <Step title="Create">
+    Click **Create** to set up the service.
+  </Step>
+</Steps>
+
+## Port Configuration
+
+### Single Port Service
+
+For most applications with one port:
+
+| Setting | Value |
+|---------|-------|
+| Container Port | `3000` (what your app listens on) |
+| Service Port | `80` (what users connect to) |
+
+This maps external port 80 to internal port 3000.
+
+### Multiple Ports
+
+Some applications need multiple ports (e.g., HTTP + gRPC):
+
+| Name | Container Port | Service Port | Protocol |
+|------|----------------|--------------|----------|
+| http | 8080 | 80 | TCP |
+| grpc | 9090 | 9090 | TCP |
+| metrics | 9100 | 9100 | TCP |
+
+## Accessing Internal Services
+
+To connect to an internal service from another deployment in the same project:
+
+```
+# Full DNS name
+http://api-server.acme-prod-myproject.svc.cluster.local:8080
+
+# Or just the service name (if in same namespace)
+http://api-server:8080
+```
+
+### From Environment Variables
+
+Set the service URL as an environment variable:
+
+```
+DATABASE_URL=postgres://postgres.acme-prod-api.svc.cluster.local:5432/mydb
+API_ENDPOINT=http://api-server:8080
+```
+
+## Updating Services
+
+To modify an existing service:
+
+<Steps>
+  <Step title="Open the Networking tab">
+    Navigate to your deployment's **Networking** tab.
+  </Step>
+  <Step title="Click on the service">
+    Select the service you want to update.
+  </Step>
+  <Step title="Make changes">
+    Modify the port configuration or other settings.
+  </Step>
+  <Step title="Save">
+    Click **Save** to apply changes.
+  </Step>
+</Steps>
+
+## Changing Service Exposure
+
+To change a service from internal to external (or vice versa):
+
+<Steps>
+  <Step title="Open the service">
+    Go to your deployment's Networking tab and select the service.
+  </Step>
+  <Step title="Change exposure">
+    Click the exposure toggle or button to switch between internal and external.
+  </Step>
+  <Step title="Save">
+    Changes take effect immediately.
+  </Step>
+</Steps>
+
+<Note>
+  Changing from external to internal will remove the public IP. Changing to external will provision a new public IP (which may take a few minutes).
+</Note>
+
+## Deleting Services
+
+To remove a service:
+
+<Steps>
+  <Step title="Open the Networking tab">
+    Go to your deployment's Networking tab.
+  </Step>
+  <Step title="Find the service">
+    Locate the service you want to delete.
+  </Step>
+  <Step title="Delete">
+    Click the delete button and confirm.
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting a service immediately removes network access. Any ingresses pointing to this service will also stop working.
+</Warning>
+
+## Service Discovery
+
+### Within the Same Project
+
+Services in the same project (namespace) can use short names:
+
+```
+http://my-service:8080
+```
+
+### Across Projects
+
+To access a service in a different project, use the full DNS name:
+
+```
+http://my-service.other-namespace.svc.cluster.local:8080
+```
+
+<Note>
+  Cross-project communication may be restricted by network policies. Check with your administrator.
+</Note>
+
+## Load Balancing
+
+When you have multiple replicas, services automatically load balance traffic across all healthy pods:
+
+```
+Service (port 80)
+    │
+    ├──► Pod 1 (port 3000)
+    ├──► Pod 2 (port 3000)
+    └──► Pod 3 (port 3000)
+```
+
+Kubernetes uses round-robin load balancing by default.
+
+## Health Checks
+
+Services only route traffic to healthy pods. A pod is considered healthy when:
+
+1. The container has started
+2. Any readiness probes pass
+3. The pod is not terminating
+
+Unhealthy pods are automatically removed from the service's endpoints.
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use internal services by default">
+    Start with internal services and only expose externally when needed. This follows the principle of least privilege.
+  </Accordion>
+  <Accordion title="Use meaningful names">
+    Name services clearly (e.g., `postgres`, `api-server`, `redis`) so they're easy to identify in configuration.
+  </Accordion>
+  <Accordion title="Document service ports">
+    Keep track of which services use which ports, especially in microservice architectures.
+  </Accordion>
+  <Accordion title="Use ingresses for HTTP traffic">
+    For web traffic with custom domains, use ingresses instead of external services to get HTTPS and better routing.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Service not accessible">
+    If you can't reach your service:
+
+    1. Verify the service exists in the Networking tab
+    2. Check that pods are running and healthy
+    3. Verify the port configuration matches your application
+    4. For external services, check the public IP is assigned
+  </Accordion>
+  <Accordion title="Connection refused">
+    If connections are refused:
+
+    1. Verify your application is listening on the correct port
+    2. Check that the container port matches what your app uses
+    3. Look at pod logs for startup errors
+  </Accordion>
+  <Accordion title="Intermittent failures">
+    If requests sometimes fail:
+
+    1. Check pod health and restart counts
+    2. Verify all replicas are healthy
+    3. Look for resource limits being hit
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Ingresses" icon="globe" href="/networking/ingresses">
+    Add custom domains with HTTPS
+  </Card>
+  <Card title="Environment Variables" icon="key" href="/deployments/environment-variables">
+    Configure service URLs in your apps
+  </Card>
+</CardGroup>

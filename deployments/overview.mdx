@@ -1,0 +1,176 @@
+---
+title: Deployments Overview
+description: Learn how deployments work in Orchard and the different ways to deploy your applications.
+---
+
+Deployments are the core of Orchard. A deployment represents a running application in your Kubernetes cluster, built from either a Docker image or source code from GitHub.
+
+## What is a Deployment?
+
+A deployment in Orchard manages:
+
+- **Container instances** (pods) running your application
+- **Scaling** with configurable replica counts
+- **Build pipeline** for GitHub-based deployments
+- **Environment variables** for configuration
+- **Volumes** for persistent storage
+- **Services** for network access
+
+## Deployment Methods
+
+Orchard supports two ways to create deployments:
+
+<CardGroup cols={2}>
+  <Card title="From Docker Image" icon="docker" href="/deployments/from-image">
+    Deploy a pre-built Docker image from any registry
+  </Card>
+  <Card title="From GitHub" icon="github" href="/deployments/from-github">
+    Build and deploy directly from your GitHub repository
+  </Card>
+</CardGroup>
+
+## Deployment Lifecycle
+
+```
+┌─────────────┐     ┌──────────┐     ┌──────────┐     ┌─────────┐
+│   Create    │ ──► │  Build   │ ──► │  Deploy  │ ──► │ Running │
+│ Deployment  │     │ (if Git) │     │ to K8s   │     │  Pods   │
+└─────────────┘     └──────────┘     └──────────┘     └─────────┘
+                          │
+                          ▼
+                    ┌──────────┐
+                    │  Push to │
+                    │ Registry │
+                    └──────────┘
+```
+
+### Build Steps (GitHub Deployments)
+
+When deploying from GitHub, Orchard goes through these stages:
+
+1. **Cloning**: Repository is cloned from GitHub
+2. **Building**: Docker image is built using your Dockerfile
+3. **Pushing**: Image is pushed to Orchard's private registry
+4. **Deploying**: Kubernetes deployment is created/updated
+
+## Deployment Status
+
+Your deployment can be in one of these states:
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Deployment is queued and waiting to start |
+| `cloning` | Repository is being cloned (GitHub deployments) |
+| `building` | Docker image is being built |
+| `pushing` | Image is being pushed to the registry |
+| `deploying` | Kubernetes resources are being created |
+| `running` | Application is running successfully |
+| `failed` | Deployment failed (check build logs for details) |
+
+## Key Deployment Properties
+
+| Property | Description |
+|----------|-------------|
+| **Name** | Unique identifier within the project |
+| **Image** | Docker image URL (for image-based deployments) |
+| **Replicas** | Number of pod instances to run |
+| **Build Type** | `dockerfile` or `railpack` (for GitHub deployments) |
+| **GitHub Repo** | Repository URL (for GitHub deployments) |
+| **GitHub Branch** | Branch to build from |
+| **Dockerfile Path** | Path to Dockerfile in repository |
+
+## Managing Deployments
+
+### Viewing Deployment Details
+
+From your project, click on a deployment to see:
+
+- **Overview**: Status, replicas, image, and basic info
+- **Logs**: Build logs and container logs
+- **Settings**: Configuration options
+- **History**: Past builds and image versions
+- **Volumes**: Attached storage
+- **Networking**: Services and ingresses
+
+### Scaling
+
+To change the number of running instances:
+
+1. Go to your deployment
+2. Click **Settings** or find the replicas setting
+3. Enter the desired number of replicas
+4. Save changes
+
+<Note>
+  Scaling to 0 replicas will stop all pods but keep the deployment configuration intact.
+</Note>
+
+### Restarting
+
+To restart your deployment with the same image:
+
+1. Go to your deployment
+2. Click **Rebuild** or **Restart**
+3. Orchard will recreate the pods with the current image
+
+### Deleting
+
+<Warning>
+  Deleting a deployment removes all pods, services, and ingresses associated with it. This cannot be undone.
+</Warning>
+
+To delete a deployment:
+
+1. Go to your deployment settings
+2. Scroll to the danger zone
+3. Click **Delete Deployment**
+4. Confirm the deletion
+
+## Image History and Rollbacks
+
+Orchard keeps track of all images deployed for each deployment. This allows you to:
+
+- View all past builds with timestamps and commit info
+- Rollback to any previous image version
+- Identify which commit is currently running
+
+To rollback:
+
+1. Go to your deployment's **History** tab
+2. Find the image version you want to restore
+3. Click **Rollback to this version**
+4. Confirm the rollback
+
+## Build Configuration
+
+### Dockerfile Path
+
+By default, Orchard looks for `Dockerfile` in your repository root. You can specify a different path:
+
+- `./Dockerfile` - Root of repository
+- `./docker/Dockerfile` - Subdirectory
+- `./services/api/Dockerfile` - Nested path
+
+### Build From Root
+
+The **Build From Root** option controls the Docker build context:
+
+- **Enabled**: Build context is the repository root (allows copying files from anywhere)
+- **Disabled**: Build context is the Dockerfile's directory (faster, smaller context)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deploy from Image" icon="docker" href="/deployments/from-image">
+    Deploy a pre-built Docker image
+  </Card>
+  <Card title="Deploy from GitHub" icon="github" href="/deployments/from-github">
+    Build and deploy from source code
+  </Card>
+  <Card title="Environment Variables" icon="key" href="/deployments/environment-variables">
+    Configure your application
+  </Card>
+  <Card title="Build Logs" icon="scroll" href="/deployments/build-logs">
+    Monitor your builds
+  </Card>
+</CardGroup>

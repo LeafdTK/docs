@@ -1,80 +1,133 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Deploy your first application to Orchard in under 5 minutes.
 ---
 
-## Get started in three steps
+This guide walks you through deploying your first application to Orchard. By the end, you'll have a running container accessible via the internet.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+- An invitation to an Orchard organization (Orchard is currently in closed beta)
+- A Docker image to deploy, or a GitHub repository with a Dockerfile
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+## Step 1: Accept Your Organization Invitation
 
-### Step 2: Deploy your changes
+Orchard is currently in closed beta. To get started, you need to be invited to an organization.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+<Steps>
+  <Step title="Check your email">
+    Look for an invitation email from Orchard with a link to join an organization.
+  </Step>
+  <Step title="Click the invitation link">
+    Click **Accept Invitation** in the email to join the organization.
+  </Step>
+  <Step title="Sign in or create account">
+    If you don't have an Orchard account yet, you'll be prompted to create one using email OTP, passkey, or Hack Club OAuth.
+  </Step>
+</Steps>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Don't have an invitation? Contact the Hack Club team to request access to the closed beta.
 </Note>
+
+## Step 2: Create a Workspace
+
+Workspaces help you organize projects. You might create separate workspaces for production and staging, or for different teams.
+
+<Steps>
+  <Step title="Open your organization">
+    Click on your newly created organization from the dashboard.
+  </Step>
+  <Step title="Create a workspace">
+    Click **New Workspace** and enter a name (e.g., "production" or "development").
+  </Step>
+</Steps>
+
+## Step 3: Create a Project
+
+Projects are where your deployments live. Each project gets its own Kubernetes namespace for isolation.
+
+<Steps>
+  <Step title="Open your workspace">
+    Click on the workspace you just created.
+  </Step>
+  <Step title="Create a project">
+    Click **New Project** and provide a name for your project.
+  </Step>
+</Steps>
+
+## Step 4: Deploy Your Application
+
+You can deploy from a Docker image or directly from a GitHub repository.
+
+<Tabs>
+  <Tab title="From Docker Image">
+    <Steps>
+      <Step title="Create a new deployment">
+        In your project, click **New Deployment**.
+      </Step>
+      <Step title="Select 'From Image'">
+        Choose the **From Image** option.
+      </Step>
+      <Step title="Configure your deployment">
+        - **Name**: A unique name for this deployment
+        - **Image**: The Docker image to deploy (e.g., `nginx:latest`)
+        - **Port**: The port your application listens on (e.g., `80`)
+        - **Replicas**: Number of instances to run (default: 1)
+      </Step>
+      <Step title="Deploy">
+        Click **Create Deployment** to start your application.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="From GitHub">
+    <Steps>
+      <Step title="Create a new deployment">
+        In your project, click **New Deployment**.
+      </Step>
+      <Step title="Select 'From GitHub'">
+        Choose the **From GitHub** option.
+      </Step>
+      <Step title="Configure your deployment">
+        - **Name**: A unique name for this deployment
+        - **Repository URL**: Your GitHub repository URL
+        - **Branch**: The branch to build from (e.g., `main`)
+        - **Dockerfile Path**: Path to your Dockerfile (e.g., `./Dockerfile`)
+        - **Port**: The port your application listens on
+      </Step>
+      <Step title="Deploy">
+        Click **Create Deployment**. Orchard will clone your repository, build the image, and deploy it.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Step 5: Expose Your Application
+
+To make your application accessible from the internet, you need to create a service and optionally an ingress.
+
+<Steps>
+  <Step title="Create a service">
+    In your deployment's **Networking** tab, click **Add Service**. Choose **External** to expose it publicly.
+  </Step>
+  <Step title="(Optional) Add a custom domain">
+    To use your own domain, create an **Ingress** and configure your DNS to point to the cluster.
+  </Step>
+</Steps>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="key" href="/deployments/environment-variables">
+    Configure your application with environment variables
+  </Card>
+  <Card title="Custom Domains" icon="globe" href="/networking/ingresses">
+    Set up custom domains with automatic HTTPS
+  </Card>
+  <Card title="Persistent Storage" icon="database" href="/storage/volumes">
+    Add persistent volumes for databases and file storage
+  </Card>
+  <Card title="Team Collaboration" icon="users" href="/team-collaboration">
+    Invite your team members to collaborate
+  </Card>
+</CardGroup>

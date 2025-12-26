@@ -1,0 +1,290 @@
+---
+title: Volumes
+description: Attach persistent storage to your deployments for databases and file storage.
+---
+
+Volumes provide persistent storage for your deployments. Unlike container filesystem storage, data in volumes survives container restarts and can be shared between pods.
+
+## Why Use Volumes?
+
+By default, data written inside a container is ephemeral—it's lost when the container restarts. Volumes solve this by providing:
+
+- **Persistence**: Data survives container restarts and redeployments
+- **Shared storage**: Multiple containers can access the same data
+- **Data integrity**: Critical data like databases is protected
+
+## Volume Types
+
+Orchard supports three types of volumes:
+
+### PersistentVolumeClaim (PVC)
+
+The most common volume type. PVCs request storage from the cluster's storage provider.
+
+**Use cases:**
+- Database storage (PostgreSQL, MySQL, MongoDB)
+- File uploads and media storage
+- Application state that must persist
+
+**Configuration:**
+| Field | Description |
+|-------|-------------|
+| Name | Unique volume name |
+| PVC Name | Name of the PersistentVolumeClaim |
+| Mount Path | Path inside the container |
+| Read Only | Whether the volume is read-only |
+
+### HostPath
+
+Mounts a directory from the host node's filesystem.
+
+**Use cases:**
+- Accessing host-specific files
+- Development and debugging
+- Node-level logs or metrics
+
+<Warning>
+  HostPath volumes are not portable across nodes. If your pod moves to a different node, it won't have access to the same data.
+</Warning>
+
+### EmptyDir
+
+Temporary storage that's created when a pod starts and deleted when the pod ends.
+
+**Use cases:**
+- Scratch space for computations
+- Sharing data between containers in the same pod
+- Caching temporary files
+
+<Note>
+  EmptyDir data is lost when the pod terminates. Don't use it for data that needs to persist.
+</Note>
+
+## Adding Volumes to a Deployment
+
+### During Deployment Creation
+
+<Steps>
+  <Step title="Create a new deployment">
+    Start creating a deployment from image or GitHub.
+  </Step>
+  <Step title="Scroll to Volumes">
+    Find the **Volumes** section.
+  </Step>
+  <Step title="Click 'Add Volume'">
+    Configure your volume:
+
+    | Field | Description | Example |
+    |-------|-------------|---------|
+    | **Name** | Unique volume name | `data-volume` |
+    | **Type** | Volume type | `pvc` |
+    | **Mount Path** | Container path | `/var/lib/data` |
+    | **PVC Name** | (for PVC type) | `my-pvc` |
+  </Step>
+  <Step title="Create">
+    The volume will be attached when the deployment starts.
+  </Step>
+</Steps>
+
+### Adding to Existing Deployments
+
+<Steps>
+  <Step title="Open your deployment">
+    Navigate to the deployment.
+  </Step>
+  <Step title="Go to Volumes tab">
+    Click on the **Volumes** tab.
+  </Step>
+  <Step title="Add volume">
+    Click **Add Volume** and configure the settings.
+  </Step>
+  <Step title="Save">
+    The deployment will restart with the new volume attached.
+  </Step>
+</Steps>
+
+## Common Configurations
+
+### PostgreSQL Database
+
+```
+Volume:
+  Name: postgres-data
+  Type: pvc
+  PVC Name: postgres-pvc
+  Mount Path: /var/lib/postgresql/data
+  Read Only: false
+```
+
+### Redis Persistence
+
+```
+Volume:
+  Name: redis-data
+  Type: pvc
+  PVC Name: redis-pvc
+  Mount Path: /data
+  Read Only: false
+```
+
+### File Uploads
+
+```
+Volume:
+  Name: uploads
+  Type: pvc
+  PVC Name: uploads-pvc
+  Mount Path: /app/uploads
+  Read Only: false
+```
+
+### Shared Cache (EmptyDir)
+
+```
+Volume:
+  Name: cache
+  Type: emptyDir
+  Mount Path: /tmp/cache
+```
+
+## Volume Permissions
+
+Some applications require specific user permissions on volume directories. Common issues:
+
+- PostgreSQL requires ownership by user `postgres` (UID 999)
+- Redis may need write permissions
+- Some apps need specific directory structures
+
+<Accordion title="Fixing permission issues">
+  If your application fails to write to a volume, you may need to:
+
+  1. Run an init container to set permissions
+  2. Configure security context in your deployment
+  3. Use a Dockerfile that sets up the correct permissions
+
+  Contact your administrator if you need help with volume permissions.
+</Accordion>
+
+## Updating Volumes
+
+To modify volume configuration:
+
+<Steps>
+  <Step title="Open Volumes tab">
+    Go to your deployment's **Volumes** tab.
+  </Step>
+  <Step title="Edit the volume">
+    Click on the volume to modify.
+  </Step>
+  <Step title="Make changes">
+    Update the mount path or read-only setting.
+  </Step>
+  <Step title="Save">
+    The deployment will restart with the updated configuration.
+  </Step>
+</Steps>
+
+<Warning>
+  Changing the PVC name will point to a different volume. Your existing data will not be accessible unless you change back to the original PVC.
+</Warning>
+
+## Removing Volumes
+
+To remove a volume from a deployment:
+
+<Steps>
+  <Step title="Open Volumes tab">
+    Go to your deployment's **Volumes** tab.
+  </Step>
+  <Step title="Find the volume">
+    Locate the volume you want to remove.
+  </Step>
+  <Step title="Delete">
+    Click the delete button and confirm.
+  </Step>
+</Steps>
+
+<Note>
+  Removing a volume from a deployment doesn't delete the underlying PVC or data. The data remains and can be reattached later.
+</Note>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use PVCs for production data">
+    Always use PersistentVolumeClaims for any data that needs to survive restarts. EmptyDir is only for temporary data.
+  </Accordion>
+  <Accordion title="Name volumes descriptively">
+    Use clear names like `postgres-data` or `uploads-storage` so it's obvious what each volume contains.
+  </Accordion>
+  <Accordion title="Choose appropriate mount paths">
+    Mount volumes at the paths your application expects. Check documentation for database-specific paths.
+  </Accordion>
+  <Accordion title="Use read-only when possible">
+    If your application only reads from a volume (like configuration), mount it as read-only for security.
+  </Accordion>
+  <Accordion title="Back up critical data">
+    Volumes provide persistence, not backup. Implement regular backups for critical data.
+  </Accordion>
+</AccordionGroup>
+
+## Storage Classes
+
+PVCs can use different storage classes that provide different performance characteristics:
+
+| Class | Characteristics | Use Case |
+|-------|-----------------|----------|
+| Standard | General purpose | Most applications |
+| SSD | High IOPS | Databases |
+| Replicated | Multi-zone redundancy | Critical data |
+
+<Note>
+  Available storage classes depend on your cluster configuration. Contact your administrator for available options.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Volume not mounting">
+    If your volume doesn't mount:
+
+    1. Check that the PVC exists and is bound
+    2. Verify the PVC name is spelled correctly
+    3. Check pod events for mounting errors
+    4. Ensure the storage class supports the requested access mode
+  </Accordion>
+  <Accordion title="Permission denied">
+    If your application can't write to the volume:
+
+    1. Check that read-only is not enabled
+    2. Verify your application user has write permissions
+    3. Check security context settings
+    4. Try running an init container to set permissions
+  </Accordion>
+  <Accordion title="Data not persisting">
+    If data disappears after restart:
+
+    1. Verify you're using a PVC, not emptyDir
+    2. Check that the mount path matches where your app writes
+    3. Ensure the PVC is not being deleted
+    4. Check for multiple volume mounts at the same path
+  </Accordion>
+  <Accordion title="Pod stuck in pending">
+    If the pod won't start due to volume issues:
+
+    1. Check if the PVC is bound
+    2. Verify available storage in the cluster
+    3. Check for scheduling conflicts (node affinity vs. volume location)
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="key" href="/deployments/environment-variables">
+    Configure your application
+  </Card>
+  <Card title="Services" icon="network-wired" href="/networking/services">
+    Expose your deployment to the network
+  </Card>
+</CardGroup>

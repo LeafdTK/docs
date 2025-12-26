@@ -1,0 +1,175 @@
+---
+title: Projects
+description: Projects contain your deployments and are isolated in their own Kubernetes namespace.
+---
+
+Projects are the lowest level of Orchard's organizational hierarchy. Each project gets its own Kubernetes namespace, providing complete isolation from other projects.
+
+## What is a Project?
+
+A project is a container that:
+
+- Holds all your deployments for a specific application or service
+- Has its own isolated Kubernetes namespace
+- Contains services, ingresses, and volumes for its deployments
+- Can be linked to a GitHub repository for automated builds
+
+## Project Isolation
+
+Each project runs in its own Kubernetes namespace. The namespace name is automatically generated from your organization, workspace, and project slugs:
+
+```
+{organization-slug}-{workspace-slug}-{project-slug}
+```
+
+For example, if you have:
+- Organization: `acme-corp`
+- Workspace: `production`
+- Project: `api`
+
+The Kubernetes namespace would be: `acme-corp-production-api`
+
+This isolation means:
+- Deployments in one project cannot directly access deployments in another
+- Resources (CPU, memory) are isolated
+- Network policies can be applied per-project
+- Secrets and configuration are scoped to the project
+
+## Creating a Project
+
+<Steps>
+  <Step title="Navigate to your workspace">
+    Open the workspace where you want to create the project.
+  </Step>
+  <Step title="Click 'New Project'">
+    Click the **New Project** button.
+  </Step>
+  <Step title="Enter project details">
+    - **Name**: A descriptive name for your project (e.g., "API", "Web App", "Worker")
+    - **Slug**: Auto-generated URL identifier
+    - **Description** (optional): Describe what this project contains
+    - **Repository URL** (optional): Link to your GitHub repository
+  </Step>
+  <Step title="Create">
+    Click **Create** to set up your project. Orchard will automatically create the corresponding Kubernetes namespace.
+  </Step>
+</Steps>
+
+## What Projects Contain
+
+A project can contain:
+
+<CardGroup cols={2}>
+  <Card title="Deployments" icon="server">
+    Running containers from Docker images or built from source code
+  </Card>
+  <Card title="Services" icon="network-wired">
+    Network endpoints for accessing your deployments internally or externally
+  </Card>
+  <Card title="Ingresses" icon="globe">
+    HTTP(S) routing rules for custom domains
+  </Card>
+  <Card title="Volumes" icon="database">
+    Persistent storage for data that survives container restarts
+  </Card>
+</CardGroup>
+
+## Project Structure Example
+
+```
+Project: API
+├── Deployments
+│   ├── api-server (main API container)
+│   └── worker (background job processor)
+├── Services
+│   ├── api-server (ClusterIP - internal)
+│   └── api-server-external (LoadBalancer - public)
+├── Ingresses
+│   └── api.example.com → api-server:8080
+└── Volumes
+    └── data-volume (PVC for persistent data)
+```
+
+## Linking a GitHub Repository
+
+You can optionally link a GitHub repository to your project. This enables:
+
+- One-click deployments from your repository
+- Automatic branch and Dockerfile detection
+- Build history tracking with commit references
+
+To link a repository:
+
+<Steps>
+  <Step title="Open project settings">
+    Navigate to your project and click **Settings**.
+  </Step>
+  <Step title="Add repository URL">
+    Enter your GitHub repository URL (e.g., `https://github.com/your-org/your-repo`).
+  </Step>
+  <Step title="Save">
+    Click **Save** to link the repository.
+  </Step>
+</Steps>
+
+<Note>
+  For private repositories, you'll need to configure GitHub access in your user settings.
+</Note>
+
+## Project Permissions
+
+Project access is controlled at the workspace level. If you have access to a workspace, you can access all projects within it based on your workspace role:
+
+| Workspace Role | Project Permissions |
+|----------------|---------------------|
+| **Admin** | Full access to all projects, including deletion |
+| **Editor** | Can create, modify, and delete deployments in all projects |
+| **Viewer** | Read-only access to all projects |
+
+## Deleting a Project
+
+<Warning>
+  Deleting a project permanently removes all deployments, services, ingresses, volumes, and the Kubernetes namespace. This cannot be undone.
+</Warning>
+
+To delete a project:
+
+<Steps>
+  <Step title="Open project settings">
+    Navigate to the project and click **Settings**.
+  </Step>
+  <Step title="Go to danger zone">
+    Scroll down to the danger zone section.
+  </Step>
+  <Step title="Delete">
+    Click **Delete Project** and confirm by typing the project name.
+  </Step>
+</Steps>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="One service per project">
+    For microservices architectures, consider creating one project per service. This provides better isolation and independent deployment cycles.
+  </Accordion>
+  <Accordion title="Group related deployments">
+    If you have an API and a worker that are tightly coupled, keep them in the same project so they can communicate easily.
+  </Accordion>
+  <Accordion title="Use descriptive names">
+    Name your projects clearly so team members know what they contain (e.g., "user-api" instead of "service1").
+  </Accordion>
+  <Accordion title="Link your repository">
+    Always link your GitHub repository for easier deployments and better tracking of what code is running.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create a Deployment" icon="rocket" href="/deployments/overview">
+    Deploy your first container
+  </Card>
+  <Card title="Set Up Networking" icon="globe" href="/networking/services">
+    Expose your deployment to the world
+  </Card>
+</CardGroup>

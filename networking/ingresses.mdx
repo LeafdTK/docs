@@ -1,0 +1,303 @@
+---
+title: Ingresses
+description: Route HTTP traffic to your deployments with custom domains and automatic HTTPS.
+---
+
+Ingresses provide HTTP(S) routing to your services. They allow you to use custom domains, enable HTTPS with automatic certificate management, and route traffic based on paths.
+
+## What is an Ingress?
+
+An ingress is a Kubernetes resource that:
+
+- Maps custom domains to your services
+- Terminates TLS/HTTPS traffic
+- Routes requests based on URL paths
+- Provides a single entry point for HTTP traffic
+
+## When to Use Ingresses
+
+<CardGroup cols={2}>
+  <Card title="Use Ingresses For" icon="check">
+    - Custom domains (api.example.com)
+    - HTTPS with auto-certificates
+    - Path-based routing (/api, /admin)
+    - Multiple services behind one domain
+  </Card>
+  <Card title="Use External Services For" icon="xmark">
+    - Direct IP access without domain
+    - Non-HTTP protocols (databases, gRPC)
+    - Quick testing without DNS setup
+  </Card>
+</CardGroup>
+
+## Creating an Ingress
+
+<Steps>
+  <Step title="Navigate to your deployment">
+    Open the deployment you want to expose.
+  </Step>
+  <Step title="Go to Networking tab">
+    Click on the **Networking** tab.
+  </Step>
+  <Step title="Click 'Add Ingress'">
+    Click **Add Ingress** to create a new ingress.
+  </Step>
+  <Step title="Configure the ingress">
+    | Field | Description | Example |
+    |-------|-------------|---------|
+    | **Host** | Your custom domain | `api.example.com` |
+    | **Path** | URL path to match | `/` or `/api` |
+    | **Service** | Target service name | `api-server` |
+    | **Port** | Target service port | `8080` |
+    | **TLS** | Enable HTTPS | `true` |
+  </Step>
+  <Step title="Create">
+    Click **Create** to set up the ingress.
+  </Step>
+</Steps>
+
+## DNS Configuration
+
+Before your ingress works, you need to point your domain to the cluster:
+
+<Steps>
+  <Step title="Get the cluster IP">
+    The cluster IP is provided in your ingress details after creation.
+  </Step>
+  <Step title="Create a DNS record">
+    Add an A record in your DNS provider:
+
+    | Type | Name | Value |
+    |------|------|-------|
+    | A | api | `<cluster-ip>` |
+
+    Or for the root domain:
+
+    | Type | Name | Value |
+    |------|------|-------|
+    | A | @ | `<cluster-ip>` |
+  </Step>
+  <Step title="Wait for propagation">
+    DNS changes can take up to 48 hours to propagate, though most update within minutes.
+  </Step>
+</Steps>
+
+## DNS Validation
+
+Orchard can validate that your DNS is configured correctly:
+
+<Steps>
+  <Step title="Open ingress settings">
+    Go to your ingress configuration.
+  </Step>
+  <Step title="Click 'Validate DNS'">
+    Click the validate button to check DNS configuration.
+  </Step>
+  <Step title="Review results">
+    Orchard will check if your domain points to the correct IP.
+  </Step>
+</Steps>
+
+## TLS/HTTPS Configuration
+
+### Automatic Certificates
+
+Orchard integrates with cert-manager to automatically provision and renew TLS certificates:
+
+<Steps>
+  <Step title="Enable TLS">
+    Toggle the TLS option when creating your ingress.
+  </Step>
+  <Step title="Select cluster issuer">
+    Choose the certificate issuer (e.g., `letsencrypt-prod`).
+  </Step>
+  <Step title="Certificate provisioning">
+    A certificate will be automatically requested and installed.
+  </Step>
+</Steps>
+
+<Note>
+  Automatic certificates require your DNS to be correctly configured before the certificate can be issued. The domain must resolve to the cluster IP.
+</Note>
+
+### Certificate Status
+
+After enabling TLS, the certificate goes through these stages:
+
+1. **Pending**: Certificate request submitted
+2. **Issuing**: Certificate authority is validating
+3. **Ready**: Certificate installed and active
+
+This process typically takes 1-2 minutes.
+
+## Path-Based Routing
+
+You can route different paths to different services:
+
+```
+example.com
+    │
+    ├── /api/*     → api-service:8080
+    ├── /admin/*   → admin-service:3000
+    └── /*         → frontend-service:80
+```
+
+### Path Types
+
+| Type | Description | Example Match |
+|------|-------------|---------------|
+| **Prefix** | Matches path and all subpaths | `/api` matches `/api`, `/api/users`, `/api/v1/users` |
+| **Exact** | Matches exact path only | `/api` matches only `/api` |
+
+### Creating Multiple Paths
+
+For each path, create a separate ingress rule or configure multiple paths in one ingress:
+
+```
+Host: example.com
+
+Rule 1:
+  Path: /api
+  Service: api-server
+  Port: 8080
+
+Rule 2:
+  Path: /
+  Service: frontend
+  Port: 80
+```
+
+## Multiple Domains
+
+To serve the same application on multiple domains:
+
+<Tabs>
+  <Tab title="Same service">
+    Create multiple ingresses pointing to the same service:
+
+    - `example.com` → api-server:8080
+    - `www.example.com` → api-server:8080
+    - `api.example.com` → api-server:8080
+  </Tab>
+  <Tab title="Different services">
+    Create separate ingresses for each domain:
+
+    - `app.example.com` → frontend:80
+    - `api.example.com` → api-server:8080
+    - `admin.example.com` → admin:3000
+  </Tab>
+</Tabs>
+
+## Ingress Annotations
+
+For advanced configuration, you can add Kubernetes annotations:
+
+| Annotation | Purpose |
+|------------|---------|
+| `cert-manager.io/cluster-issuer` | Specify certificate issuer |
+| `nginx.ingress.kubernetes.io/rewrite-target` | Rewrite URL paths |
+| `nginx.ingress.kubernetes.io/ssl-redirect` | Force HTTPS redirect |
+
+<Note>
+  Available annotations depend on your ingress controller. Contact your administrator for supported annotations.
+</Note>
+
+## Updating Ingresses
+
+To modify an existing ingress:
+
+<Steps>
+  <Step title="Open Networking tab">
+    Go to your deployment's Networking tab.
+  </Step>
+  <Step title="Select the ingress">
+    Click on the ingress you want to update.
+  </Step>
+  <Step title="Make changes">
+    Modify the host, path, or TLS settings.
+  </Step>
+  <Step title="Save">
+    Click **Save** to apply changes.
+  </Step>
+</Steps>
+
+## Deleting Ingresses
+
+<Steps>
+  <Step title="Open Networking tab">
+    Go to your deployment's Networking tab.
+  </Step>
+  <Step title="Find the ingress">
+    Locate the ingress you want to delete.
+  </Step>
+  <Step title="Delete">
+    Click the delete button and confirm.
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting an ingress immediately removes the routing rule. Your domain will no longer route to your service.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Always use HTTPS">
+    Enable TLS for all production ingresses. HTTP traffic can be intercepted and modified.
+  </Accordion>
+  <Accordion title="Use www redirect">
+    Redirect www to non-www (or vice versa) for consistency. Configure one as the canonical URL.
+  </Accordion>
+  <Accordion title="Set up DNS before creating ingress">
+    Configure DNS first to avoid certificate issuance delays.
+  </Accordion>
+  <Accordion title="Monitor certificate expiry">
+    While certificates auto-renew, monitor for renewal failures to avoid unexpected expiry.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Domain not working">
+    If your domain doesn't reach your service:
+
+    1. Verify DNS is pointing to the cluster IP
+    2. Check the ingress status in Orchard
+    3. Ensure the target service exists and has healthy pods
+    4. Wait for DNS propagation (up to 48 hours)
+  </Accordion>
+  <Accordion title="Certificate not issued">
+    If TLS certificate stays pending:
+
+    1. Verify DNS is correctly configured
+    2. Check that port 80 is accessible for HTTP-01 challenge
+    3. Review certificate status for error messages
+    4. Try deleting and recreating the ingress
+  </Accordion>
+  <Accordion title="HTTPS redirect not working">
+    If HTTP doesn't redirect to HTTPS:
+
+    1. Verify TLS is enabled on the ingress
+    2. Check for ssl-redirect annotation
+    3. Clear browser cache and try again
+  </Accordion>
+  <Accordion title="Path routing incorrect">
+    If requests go to the wrong service:
+
+    1. Check path priority (more specific paths should be first)
+    2. Verify path type (Prefix vs Exact)
+    3. Review all ingress rules for the same host
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Services" icon="network-wired" href="/networking/services">
+    Learn about service types and configuration
+  </Card>
+  <Card title="Volumes" icon="database" href="/storage/volumes">
+    Add persistent storage to your deployments
+  </Card>
+</CardGroup>

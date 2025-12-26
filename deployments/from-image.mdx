@@ -1,0 +1,208 @@
+---
+title: Deploy from Docker Image
+description: Deploy a pre-built Docker image from any container registry.
+---
+
+The fastest way to deploy to Orchard is using a pre-built Docker image. This is ideal when you have an existing CI/CD pipeline that builds and pushes images, or when using public images.
+
+## Prerequisites
+
+- A project in Orchard
+- A Docker image accessible from the cluster (public or with credentials)
+
+## Creating a Deployment
+
+<Steps>
+  <Step title="Navigate to your project">
+    Open the project where you want to create the deployment.
+  </Step>
+  <Step title="Click 'New Deployment'">
+    Click the **New Deployment** button.
+  </Step>
+  <Step title="Select 'From Image'">
+    Choose the **From Image** deployment method.
+  </Step>
+  <Step title="Configure the deployment">
+    Fill in the required fields:
+
+    | Field | Description | Example |
+    |-------|-------------|---------|
+    | **Name** | Unique name for this deployment | `api-server` |
+    | **Image** | Full Docker image URL with tag | `nginx:latest` |
+    | **Port** | Primary port your app listens on | `8080` |
+    | **Replicas** | Number of instances to run | `2` |
+  </Step>
+  <Step title="Add environment variables (optional)">
+    Add any environment variables your application needs.
+  </Step>
+  <Step title="Configure networking (optional)">
+    Choose whether to expose your deployment publicly.
+  </Step>
+  <Step title="Create">
+    Click **Create Deployment** to start your application.
+  </Step>
+</Steps>
+
+## Image Sources
+
+Orchard can pull images from various sources:
+
+<Tabs>
+  <Tab title="Docker Hub">
+    For public Docker Hub images, use the simple format:
+
+    ```
+    nginx:latest
+    redis:7-alpine
+    postgres:15
+    ```
+
+    For official images, you don't need a registry prefix.
+  </Tab>
+  <Tab title="GitHub Container Registry">
+    For GitHub packages:
+
+    ```
+    ghcr.io/your-org/your-image:tag
+    ```
+  </Tab>
+  <Tab title="Custom Registry">
+    For any private registry:
+
+    ```
+    registry.example.com/your-image:tag
+    ```
+
+    <Note>
+      Private registries may require image pull secrets. Contact your administrator if you need access to private registries.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Image Tags
+
+Always specify an image tag to ensure consistent deployments:
+
+| Tag Type | Example | Use Case |
+|----------|---------|----------|
+| **Specific version** | `nginx:1.25.3` | Production deployments |
+| **Minor version** | `nginx:1.25` | Auto-update patch versions |
+| **Latest** | `nginx:latest` | Development only |
+| **Git SHA** | `myapp:abc123f` | CI/CD pipelines |
+
+<Warning>
+  Avoid using `latest` in production. If the upstream image changes, your deployment behavior may change unexpectedly.
+</Warning>
+
+## Port Configuration
+
+### Single Port
+
+For applications with one port:
+
+```
+Port: 8080
+```
+
+This creates a service that routes traffic to port 8080 in your container.
+
+### Multiple Ports
+
+For applications with multiple ports (e.g., HTTP and gRPC):
+
+| Name | Container Port | Service Port | Protocol |
+|------|----------------|--------------|----------|
+| http | 8080 | 80 | TCP |
+| grpc | 9090 | 9090 | TCP |
+
+## Updating the Image
+
+To deploy a new version of your image:
+
+<Steps>
+  <Step title="Go to your deployment">
+    Open the deployment you want to update.
+  </Step>
+  <Step title="Open Settings">
+    Navigate to the **Settings** tab.
+  </Step>
+  <Step title="Update the image">
+    Change the image tag to the new version (e.g., `myapp:v2.0.0`).
+  </Step>
+  <Step title="Save">
+    Click **Save**. Orchard will pull the new image and perform a rolling update.
+  </Step>
+</Steps>
+
+## Rolling Updates
+
+When you update an image, Orchard performs a rolling update by default:
+
+1. New pods with the updated image are created
+2. Once new pods are healthy, old pods are terminated
+3. This ensures zero downtime during updates
+
+## Example: Deploying nginx
+
+Here's a complete example of deploying nginx:
+
+<Steps>
+  <Step title="Create deployment">
+    - **Name**: `web-server`
+    - **Image**: `nginx:1.25-alpine`
+    - **Port**: `80`
+    - **Replicas**: `2`
+  </Step>
+  <Step title="Add environment variables">
+    - `NGINX_HOST`: `example.com`
+    - `NGINX_PORT`: `80`
+  </Step>
+  <Step title="Expose publicly">
+    Enable **Expose Public** to create a LoadBalancer service.
+  </Step>
+</Steps>
+
+After creation, you'll get an external IP or can create an ingress for a custom domain.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Image pull errors">
+    If your deployment fails with an image pull error:
+
+    1. Verify the image name and tag are correct
+    2. Check if the image exists in the registry
+    3. For private registries, ensure pull secrets are configured
+  </Accordion>
+  <Accordion title="Container crashes immediately">
+    If pods keep restarting:
+
+    1. Check the container logs for error messages
+    2. Verify environment variables are correct
+    3. Ensure the port configuration matches your application
+  </Accordion>
+  <Accordion title="Application not responding">
+    If the deployment is running but not responding:
+
+    1. Verify the port matches what your application listens on
+    2. Check if a service has been created
+    3. Review network policies that might block traffic
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="key" href="/deployments/environment-variables">
+    Configure your application with environment variables
+  </Card>
+  <Card title="Services" icon="network-wired" href="/networking/services">
+    Expose your deployment to the network
+  </Card>
+  <Card title="Ingresses" icon="globe" href="/networking/ingresses">
+    Add a custom domain to your deployment
+  </Card>
+  <Card title="Volumes" icon="database" href="/storage/volumes">
+    Add persistent storage
+  </Card>
+</CardGroup>

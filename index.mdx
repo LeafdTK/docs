@@ -1,97 +1,74 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: Introduction
+description: Deploy your applications to Kubernetes with Orchard, Hack Club's container orchestration platform.
 ---
 
-## Setting up
+<Note>
+  Orchard is currently in **closed beta**. You need an invitation to an organization to get started. Contact the Hack Club team to request access.
+</Note>
 
-Get your documentation site up and running in minutes.
+## What is Orchard?
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+Orchard is a Kubernetes-native deployment platform built by Hack Club. It provides an intuitive interface for deploying containerized applications without needing to write complex Kubernetes manifests or manage cluster infrastructure directly.
 
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Deploy your first application in under 5 minutes
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Concepts" icon="book" href="/concepts/organizations">
+    Understand how Orchard organizes your resources
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Deployments" icon="server" href="/deployments/overview">
+    Learn about deployment options and build systems
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Networking" icon="network-wired" href="/networking/services">
+    Expose your applications to the world
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Key Features
 
-Everything you need to create world-class documentation.
+### Container Orchestration
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+Deploy containers from Docker images or build directly from your GitHub repositories. Orchard handles image building, registry management, and Kubernetes deployment automatically.
 
-## Need inspiration?
+### Team Collaboration
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+Organize your work with organizations, workspaces, and projects. Invite team members with role-based permissions and manage access across your entire infrastructure.
+
+### Built-in Networking
+
+Expose your applications with internal services or public ingresses. Configure custom domains with automatic TLS certificate management.
+
+### Persistent Storage
+
+Attach volumes to your deployments for databases, file storage, and any workloads requiring persistent data.
+
+## How Orchard is Organized
+
+Orchard uses a three-tier hierarchy to organize your resources:
+
+```
+Organization
+└── Workspace
+    └── Project
+        ├── Deployments
+        ├── Services
+        ├── Ingresses
+        └── Volumes
+```
+
+- **Organizations** are the top-level container, typically representing your team or company
+- **Workspaces** group related projects together, such as by environment (production, staging) or team
+- **Projects** contain your actual deployments and are isolated in their own Kubernetes namespace
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Your First Deployment" icon="play" href="/quickstart">
+    Follow our quickstart guide to deploy an application
+  </Card>
+  <Card title="Set Up Your Team" icon="users" href="/team-collaboration">
+    Learn how to invite team members and manage permissions
+  </Card>
+</CardGroup>

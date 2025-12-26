@@ -1,0 +1,280 @@
+---
+title: Deploy from GitHub
+description: Build and deploy your application directly from a GitHub repository.
+---
+
+Orchard can clone your GitHub repository, build a Docker image, and deploy it automatically. This is the simplest way to get your application running without setting up a separate CI/CD pipeline.
+
+## Prerequisites
+
+- A project in Orchard
+- A GitHub repository with a Dockerfile
+- GitHub access configured (for private repositories)
+
+## Creating a Deployment
+
+<Steps>
+  <Step title="Navigate to your project">
+    Open the project where you want to create the deployment.
+  </Step>
+  <Step title="Click 'New Deployment'">
+    Click the **New Deployment** button.
+  </Step>
+  <Step title="Select 'From GitHub'">
+    Choose the **From GitHub** deployment method.
+  </Step>
+  <Step title="Configure the deployment">
+    Fill in the required fields:
+
+    | Field | Description | Example |
+    |-------|-------------|---------|
+    | **Name** | Unique name for this deployment | `api-server` |
+    | **Repository URL** | Full GitHub repository URL | `https://github.com/org/repo` |
+    | **Branch** | Branch to build from | `main` |
+    | **Dockerfile Path** | Path to your Dockerfile | `./Dockerfile` |
+    | **Port** | Port your application listens on | `3000` |
+  </Step>
+  <Step title="Configure build options">
+    - **Build Type**: Choose `dockerfile` (default) or `railpack`
+    - **Build From Root**: Enable if your Dockerfile needs access to the entire repo
+  </Step>
+  <Step title="Add environment variables (optional)">
+    Add any environment variables your application needs.
+  </Step>
+  <Step title="Create">
+    Click **Create Deployment** to start the build process.
+  </Step>
+</Steps>
+
+## Build Process
+
+When you create a GitHub deployment, Orchard runs through these steps:
+
+```
+1. Clone        → Repository is cloned from GitHub
+2. Build        → Docker image is built using your Dockerfile
+3. Push         → Image is pushed to Orchard's private registry
+4. Deploy       → Kubernetes deployment is created
+```
+
+You can monitor each step in real-time from the deployment's **Logs** tab.
+
+## Build Types
+
+### Dockerfile (Default)
+
+The standard build type. Orchard runs `docker build` using your Dockerfile:
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+### Railpack
+
+Railpack is an alternative builder optimized for Ruby on Rails applications. It automatically:
+
+- Detects Rails configuration
+- Installs dependencies
+- Compiles assets
+- Sets up the runtime environment
+
+<Note>
+  Railpack is specifically designed for Rails apps. For other frameworks, use the standard Dockerfile build type.
+</Note>
+
+## Dockerfile Path
+
+The `Dockerfile Path` tells Orchard where to find your Dockerfile:
+
+| Path | Location |
+|------|----------|
+| `./Dockerfile` | Repository root |
+| `./docker/Dockerfile` | `docker` subdirectory |
+| `./services/api/Dockerfile` | Nested path for monorepos |
+
+## Build Context
+
+The **Build From Root** option controls the Docker build context:
+
+<Tabs>
+  <Tab title="Disabled (Default)">
+    The build context is the directory containing the Dockerfile.
+
+    ```
+    repo/
+    ├── docker/
+    │   └── Dockerfile  ← Build context starts here
+    └── src/
+    ```
+
+    Your Dockerfile can only `COPY` files from the `docker/` directory.
+
+    **Pros**: Faster builds, smaller context
+    **Cons**: Limited file access
+  </Tab>
+  <Tab title="Enabled">
+    The build context is the repository root.
+
+    ```
+    repo/               ← Build context starts here
+    ├── docker/
+    │   └── Dockerfile
+    └── src/
+    ```
+
+    Your Dockerfile can `COPY` files from anywhere in the repository.
+
+    **Pros**: Full file access
+    **Cons**: Larger context, potentially slower
+  </Tab>
+</Tabs>
+
+## Private Repositories
+
+For private GitHub repositories, you need to configure GitHub access:
+
+<Steps>
+  <Step title="Go to user settings">
+    Click on your profile and select **Settings**.
+  </Step>
+  <Step title="Connect GitHub">
+    In the GitHub section, authorize Orchard to access your repositories.
+  </Step>
+  <Step title="Use the repository">
+    Now you can deploy from any repository you have access to.
+  </Step>
+</Steps>
+
+## Rebuilding
+
+To rebuild your deployment with the latest code:
+
+<Steps>
+  <Step title="Open your deployment">
+    Navigate to the deployment you want to rebuild.
+  </Step>
+  <Step title="Click 'Rebuild'">
+    Click the **Rebuild** button.
+  </Step>
+  <Step title="Wait for completion">
+    Orchard will clone the latest code, build a new image, and deploy it.
+  </Step>
+</Steps>
+
+<Note>
+  Rebuilding uses the same branch and Dockerfile path as the original deployment. To change these, update the deployment settings.
+</Note>
+
+## Canceling a Build
+
+If you need to stop an in-progress build:
+
+1. Go to your deployment
+2. Click **Cancel Build**
+3. The build will be terminated and no changes will be made
+
+## Image History
+
+Every successful build creates a new image that's stored in your deployment's history. You can:
+
+- View all past builds with timestamps
+- See which Git commit each build corresponds to
+- Rollback to any previous build
+
+## Rollbacks
+
+To rollback to a previous version:
+
+<Steps>
+  <Step title="Open History tab">
+    Navigate to your deployment's **History** tab.
+  </Step>
+  <Step title="Find the version">
+    Locate the image version you want to restore.
+  </Step>
+  <Step title="Rollback">
+    Click **Rollback** next to that version.
+  </Step>
+  <Step title="Confirm">
+    Confirm the rollback. Your deployment will update to use the older image.
+  </Step>
+</Steps>
+
+## Example: Node.js Application
+
+Here's a complete example for deploying a Node.js app:
+
+**Repository structure:**
+```
+my-api/
+├── Dockerfile
+├── package.json
+├── package-lock.json
+└── src/
+    └── index.js
+```
+
+**Dockerfile:**
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3000
+CMD ["node", "src/index.js"]
+```
+
+**Deployment configuration:**
+- **Name**: `my-api`
+- **Repository**: `https://github.com/myorg/my-api`
+- **Branch**: `main`
+- **Dockerfile Path**: `./Dockerfile`
+- **Port**: `3000`
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Clone failed">
+    If the repository fails to clone:
+
+    1. Verify the repository URL is correct
+    2. Check that the branch exists
+    3. For private repos, ensure GitHub access is configured
+  </Accordion>
+  <Accordion title="Build failed">
+    If the Docker build fails:
+
+    1. Check the build logs for error messages
+    2. Verify your Dockerfile is valid
+    3. Ensure all required files are in the build context
+    4. Try enabling "Build From Root" if files are missing
+  </Accordion>
+  <Accordion title="Push failed">
+    If the image fails to push:
+
+    1. Check the build logs for registry errors
+    2. This is usually a temporary issue - try rebuilding
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Build Logs" icon="scroll" href="/deployments/build-logs">
+    Learn how to read and debug build logs
+  </Card>
+  <Card title="Environment Variables" icon="key" href="/deployments/environment-variables">
+    Configure your application
+  </Card>
+  <Card title="Services" icon="network-wired" href="/networking/services">
+    Expose your deployment to the network
+  </Card>
+</CardGroup>

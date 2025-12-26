@@ -1,0 +1,115 @@
+---
+title: Authentication
+description: Sign in to Orchard using email, passkeys, or Hack Club OAuth.
+---
+
+Orchard supports multiple authentication methods to keep your account secure while providing a seamless sign-in experience.
+
+## Authentication Methods
+
+### Email One-Time Password (OTP)
+
+The simplest way to sign in is with your email address. Orchard sends you a 6-digit code that you enter to verify your identity.
+
+<Steps>
+  <Step title="Enter your email">
+    On the sign-in page, enter your email address.
+  </Step>
+  <Step title="Check your inbox">
+    You'll receive an email with a 6-digit verification code.
+  </Step>
+  <Step title="Enter the code">
+    Type the code into the verification field to complete sign-in.
+  </Step>
+</Steps>
+
+<Note>
+  OTP codes expire after a short time. If your code expires, request a new one.
+</Note>
+
+### Passkeys (WebAuthn)
+
+Passkeys provide passwordless authentication using your device's biometrics or security key. This is the most secure and convenient authentication method.
+
+**Supported passkey types:**
+- Face ID / Touch ID (Apple devices)
+- Windows Hello
+- Hardware security keys (YubiKey, etc.)
+- Android biometrics
+
+<Accordion title="Setting up a passkey">
+  <Steps>
+    <Step title="Sign in to your account">
+      Use email OTP or another method to access your account.
+    </Step>
+    <Step title="Go to Settings">
+      Navigate to your user settings page.
+    </Step>
+    <Step title="Add a passkey">
+      Click **Add Passkey** and follow your browser's prompts to register your device.
+    </Step>
+    <Step title="Name your passkey">
+      Give the passkey a friendly name (e.g., "MacBook Pro" or "YubiKey") so you can identify it later.
+    </Step>
+  </Steps>
+</Accordion>
+
+<Accordion title="Signing in with a passkey">
+  <Steps>
+    <Step title="Click 'Sign in with Passkey'">
+      On the sign-in page, select the passkey option.
+    </Step>
+    <Step title="Authenticate">
+      Your browser will prompt you to use your biometrics or security key.
+    </Step>
+    <Step title="Done">
+      You're signed in immediately after successful authentication.
+    </Step>
+  </Steps>
+</Accordion>
+
+### Hack Club OAuth
+
+If you have a Hack Club account, you can sign in directly using Hack Club OAuth. This automatically syncs your profile information.
+
+<Steps>
+  <Step title="Click 'Sign in with Hack Club'">
+    On the sign-in page, click the Hack Club sign-in button.
+  </Step>
+  <Step title="Authorize Orchard">
+    If prompted, authorize Orchard to access your Hack Club profile.
+  </Step>
+  <Step title="Done">
+    You'll be redirected back to Orchard and signed in.
+  </Step>
+</Steps>
+
+## Managing Your Sessions
+
+When you sign in, Orchard creates a session that lasts for 7 days. You can sign out at any time from the user menu.
+
+## Security Features
+
+### Rate Limiting
+
+To protect against brute force attacks, Orchard limits the number of authentication attempts:
+
+- OTP requests are rate-limited per email address
+- Passkey attempts are rate-limited per IP address
+- After too many failed attempts, you'll need to wait before trying again
+
+### Secure Cookies
+
+Session tokens are stored in secure, HTTP-only cookies that can't be accessed by JavaScript. This protects against cross-site scripting (XSS) attacks.
+
+## Managing Passkeys
+
+You can manage your registered passkeys from your user settings:
+
+- **View passkeys**: See all registered passkeys with their names and last used dates
+- **Remove passkeys**: Delete passkeys you no longer use
+- **Add new passkeys**: Register additional devices for backup access
+
+<Warning>
+  Always keep at least one authentication method available. If you remove all passkeys and lose access to your email, you won't be able to recover your account.
+</Warning>

@@ -1,0 +1,222 @@
+---
+title: Build Logs
+description: Monitor and debug your deployment builds with real-time logs.
+---
+
+When deploying from GitHub, Orchard provides real-time build logs so you can monitor progress and debug any issues that arise during the build process.
+
+## Accessing Build Logs
+
+<Steps>
+  <Step title="Open your deployment">
+    Navigate to the deployment you want to monitor.
+  </Step>
+  <Step title="Go to the Logs tab">
+    Click on the **Logs** tab to view build output.
+  </Step>
+  <Step title="Monitor in real-time">
+    For active builds, logs stream in real-time. For completed builds, you'll see the full log history.
+  </Step>
+</Steps>
+
+## Build Stages
+
+Build logs are organized by stage. Each stage shows its status and detailed output:
+
+### 1. Cloning
+
+```
+[INFO] Cloning repository...
+[INFO] Repository: https://github.com/org/repo
+[INFO] Branch: main
+[INFO] Receiving objects: 100% (156/156)
+[INFO] Clone completed successfully
+```
+
+This stage downloads your code from GitHub. Progress is shown as a percentage for large repositories.
+
+### 2. Building
+
+```
+[INFO] Building Docker image...
+[INFO] Step 1/8 : FROM node:20-alpine
+[INFO] ---> abc123def456
+[INFO] Step 2/8 : WORKDIR /app
+[INFO] ---> Running in xyz789
+[INFO] Step 3/8 : COPY package*.json ./
+...
+[INFO] Successfully built abc123def456
+```
+
+This stage runs `docker build` with your Dockerfile. You'll see each Dockerfile instruction executed.
+
+### 3. Pushing
+
+```
+[INFO] Pushing image to registry...
+[INFO] The push refers to repository [harbor.1mp.dev/orchard/myproject-mydeployment]
+[INFO] abc123: Pushed
+[INFO] def456: Pushed
+[INFO] Push completed: harbor.1mp.dev/orchard/myproject-mydeployment:20231225-143022
+```
+
+This stage uploads your built image to Orchard's private registry.
+
+### 4. Deploying
+
+```
+[INFO] Deploying to Kubernetes...
+[INFO] Creating/updating deployment: mydeployment
+[INFO] Deployment updated successfully
+[INFO] Waiting for pods to be ready...
+[INFO] Pod mydeployment-abc123 is running
+```
+
+This stage creates or updates the Kubernetes resources.
+
+## Log Levels
+
+Logs are color-coded by level:
+
+| Level | Meaning |
+|-------|---------|
+| **INFO** | Normal progress information |
+| **WARNING** | Non-critical issues that might need attention |
+| **ERROR** | Errors that may cause the build to fail |
+
+## Common Build Errors
+
+<AccordionGroup>
+  <Accordion title="Clone failed: Repository not found">
+    ```
+    [ERROR] Failed to clone repository
+    [ERROR] Repository not found or access denied
+    ```
+
+    **Solutions:**
+    - Verify the repository URL is correct
+    - For private repos, check that GitHub access is configured
+    - Ensure you have permission to access the repository
+  </Accordion>
+  <Accordion title="Clone failed: Branch not found">
+    ```
+    [ERROR] Failed to clone repository
+    [ERROR] Branch 'feature-branch' not found
+    ```
+
+    **Solutions:**
+    - Check that the branch name is spelled correctly
+    - Verify the branch exists in the repository
+    - Try using the default branch (usually `main` or `master`)
+  </Accordion>
+  <Accordion title="Build failed: Dockerfile not found">
+    ```
+    [ERROR] Build failed
+    [ERROR] Cannot locate Dockerfile at ./Dockerfile
+    ```
+
+    **Solutions:**
+    - Check the Dockerfile path in your deployment settings
+    - Ensure the Dockerfile exists at the specified path
+    - Verify the file is named exactly `Dockerfile` (case-sensitive)
+  </Accordion>
+  <Accordion title="Build failed: COPY failed">
+    ```
+    [ERROR] Step 5/8 : COPY src/ ./src/
+    [ERROR] COPY failed: file not found in build context
+    ```
+
+    **Solutions:**
+    - Enable "Build From Root" if the file is outside the Dockerfile directory
+    - Verify the path exists in your repository
+    - Check for typos in the path
+  </Accordion>
+  <Accordion title="Build failed: npm install errors">
+    ```
+    [ERROR] npm ERR! code ERESOLVE
+    [ERROR] npm ERR! ERESOLVE could not resolve dependency tree
+    ```
+
+    **Solutions:**
+    - Check your package.json for dependency conflicts
+    - Try using `npm ci` instead of `npm install` in your Dockerfile
+    - Ensure your lockfile is committed and up to date
+  </Accordion>
+  <Accordion title="Push failed: Registry error">
+    ```
+    [ERROR] Failed to push image
+    [ERROR] Error from registry: timeout
+    ```
+
+    **Solutions:**
+    - This is usually a temporary issue
+    - Try rebuilding after a few minutes
+    - If persistent, check for large image sizes that may cause timeouts
+  </Accordion>
+</AccordionGroup>
+
+## Debugging Tips
+
+### Check the Dockerfile Locally
+
+Before pushing to Orchard, test your Dockerfile locally:
+
+```bash
+# Build the image
+docker build -t myapp .
+
+# Run the container
+docker run -p 3000:3000 myapp
+```
+
+### Reduce Build Times
+
+Large builds can timeout. To speed up builds:
+
+1. **Use multi-stage builds** to reduce final image size
+2. **Order Dockerfile commands** from least to most frequently changed
+3. **Use .dockerignore** to exclude unnecessary files:
+
+```
+node_modules
+.git
+*.md
+.env*
+```
+
+### View Historical Logs
+
+Build logs are preserved for each build. To view logs from a previous build:
+
+1. Go to your deployment's **History** tab
+2. Click on a previous build
+3. View the logs for that specific build
+
+## Container Logs
+
+In addition to build logs, you can view runtime container logs:
+
+<Steps>
+  <Step title="Open your deployment">
+    Navigate to your deployment.
+  </Step>
+  <Step title="Go to Logs tab">
+    Click on the **Logs** tab.
+  </Step>
+  <Step title="Select container logs">
+    Switch to view container/pod logs instead of build logs.
+  </Step>
+</Steps>
+
+Container logs show your application's stdout and stderr output.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deploy from GitHub" icon="github" href="/deployments/from-github">
+    Learn more about GitHub deployments
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/deployments/overview#troubleshooting">
+    Common issues and solutions
+  </Card>
+</CardGroup>

@@ -1,0 +1,232 @@
+---
+title: Environment Variables
+description: Configure your deployments with environment variables.
+---
+
+Environment variables allow you to configure your application without hardcoding values in your code. They're essential for managing secrets, feature flags, and environment-specific settings.
+
+## Adding Environment Variables
+
+You can add environment variables when creating a deployment or update them later.
+
+### During Deployment Creation
+
+<Steps>
+  <Step title="Create a new deployment">
+    Start creating a deployment from image or GitHub.
+  </Step>
+  <Step title="Scroll to Environment Variables">
+    Find the **Environment Variables** section.
+  </Step>
+  <Step title="Add variables">
+    Click **Add Variable** and enter:
+    - **Key**: The variable name (e.g., `DATABASE_URL`)
+    - **Value**: The variable value
+  </Step>
+  <Step title="Add more as needed">
+    Repeat for each environment variable your application needs.
+  </Step>
+</Steps>
+
+### Updating Existing Deployments
+
+<Steps>
+  <Step title="Open your deployment">
+    Navigate to the deployment you want to update.
+  </Step>
+  <Step title="Go to Settings">
+    Click on the **Settings** tab.
+  </Step>
+  <Step title="Edit environment variables">
+    Add, modify, or remove environment variables as needed.
+  </Step>
+  <Step title="Save changes">
+    Click **Save**. The deployment will restart with the new configuration.
+  </Step>
+</Steps>
+
+<Note>
+  Changing environment variables requires a restart of your pods. Orchard performs a rolling restart to minimize downtime.
+</Note>
+
+## Common Use Cases
+
+### Database Connections
+
+```
+DATABASE_URL=postgres://user:pass@db-host:5432/mydb
+REDIS_URL=redis://redis-host:6379
+```
+
+### API Keys and Secrets
+
+```
+API_KEY=sk-xxxxxxxxxxxx
+JWT_SECRET=your-secret-key
+STRIPE_SECRET_KEY=sk_live_xxxxxxxx
+```
+
+### Application Configuration
+
+```
+NODE_ENV=production
+LOG_LEVEL=info
+PORT=3000
+```
+
+### Feature Flags
+
+```
+FEATURE_NEW_UI=true
+ENABLE_ANALYTICS=true
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use descriptive names">
+    Use clear, uppercase names with underscores:
+
+    **Good:**
+    - `DATABASE_URL`
+    - `API_KEY`
+    - `ENABLE_FEATURE_X`
+
+    **Avoid:**
+    - `db`
+    - `key1`
+    - `x`
+  </Accordion>
+  <Accordion title="Don't commit secrets">
+    Never commit secrets to your repository. Use environment variables for:
+
+    - API keys
+    - Database passwords
+    - JWT secrets
+    - Third-party service credentials
+  </Accordion>
+  <Accordion title="Use different values per environment">
+    Keep development and production configurations separate:
+
+    **Development:**
+    ```
+    DATABASE_URL=postgres://localhost:5432/dev_db
+    LOG_LEVEL=debug
+    ```
+
+    **Production:**
+    ```
+    DATABASE_URL=postgres://prod-db:5432/prod_db
+    LOG_LEVEL=info
+    ```
+  </Accordion>
+  <Accordion title="Document required variables">
+    Keep a list of required environment variables in your README or documentation:
+
+    ```markdown
+    ## Required Environment Variables
+
+    | Variable | Description | Example |
+    |----------|-------------|---------|
+    | DATABASE_URL | PostgreSQL connection string | postgres://... |
+    | API_KEY | External API key | sk-xxxx |
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Referencing Internal Services
+
+When your deployment needs to connect to another service in the same project, use Kubernetes internal DNS:
+
+```
+# Format: {service-name}.{namespace}.svc.cluster.local:{port}
+
+# Example for a database service named "postgres" in the same project:
+DATABASE_HOST=postgres.acme-prod-api.svc.cluster.local
+DATABASE_PORT=5432
+```
+
+The namespace follows the pattern: `{org-slug}-{workspace-slug}-{project-slug}`
+
+## Variable Interpolation
+
+Environment variable values are stored exactly as entered. Orchard does not perform variable interpolation. If you need to build URLs from components:
+
+**Instead of:**
+```
+# This won't work
+DATABASE_URL=postgres://${DB_HOST}:${DB_PORT}/mydb
+```
+
+**Use:**
+```
+# Store the complete value
+DATABASE_URL=postgres://db-host:5432/mydb
+```
+
+Or handle interpolation in your application code.
+
+## Bulk Operations
+
+### Importing from .env File
+
+While Orchard doesn't directly import `.env` files, you can quickly add multiple variables:
+
+1. Prepare your variables in key=value format
+2. Add them one by one in the UI
+3. Or use the API for bulk operations
+
+### Copying Between Deployments
+
+To copy environment variables from one deployment to another:
+
+1. Note the variables from the source deployment
+2. Create or edit the target deployment
+3. Add the same variables
+
+<Note>
+  Be careful when copying variables between environments. Database URLs, API keys, and other secrets should differ between staging and production.
+</Note>
+
+## Sensitive Values
+
+Environment variables containing sensitive data like passwords and API keys are:
+
+- Stored securely in the database
+- Not exposed in logs or the UI after creation
+- Passed securely to containers at runtime
+
+<Warning>
+  While Orchard handles secrets securely, be careful not to log environment variables in your application code, as this could expose sensitive values.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Variable not available in container">
+    If your application can't find an environment variable:
+
+    1. Verify the variable is saved in deployment settings
+    2. Check for typos in the variable name
+    3. Ensure the deployment has been restarted after changes
+    4. Check your application is reading the correct variable name
+  </Accordion>
+  <Accordion title="Special characters in values">
+    If your value contains special characters:
+
+    - Quotes, spaces, and special characters are supported
+    - No need to escape characters in the UI
+    - The value is passed exactly as entered to your container
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Volumes" icon="database" href="/storage/volumes">
+    Add persistent storage for your data
+  </Card>
+  <Card title="Services" icon="network-wired" href="/networking/services">
+    Expose your deployment to the network
+  </Card>
+</CardGroup>

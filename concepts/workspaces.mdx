@@ -1,0 +1,178 @@
+---
+title: Workspaces
+description: Workspaces group related projects together within an organization.
+---
+
+Workspaces are the second level of Orchard's hierarchy, sitting between organizations and projects. They help you organize projects by environment, team, or any other logical grouping.
+
+## What is a Workspace?
+
+A workspace is a logical container that:
+
+- Groups related projects together
+- Has its own member list with independent permissions
+- Provides isolation between different environments or teams
+- Contains projects that share a common purpose
+
+## Common Workspace Patterns
+
+<Tabs>
+  <Tab title="By Environment">
+    ```
+    Organization: Acme Corp
+    ├── Workspace: Production
+    │   ├── Project: API
+    │   ├── Project: Web App
+    │   └── Project: Worker
+    ├── Workspace: Staging
+    │   ├── Project: API
+    │   └── Project: Web App
+    └── Workspace: Development
+        └── Project: Sandbox
+    ```
+  </Tab>
+  <Tab title="By Team">
+    ```
+    Organization: Acme Corp
+    ├── Workspace: Backend Team
+    │   ├── Project: API
+    │   └── Project: Database Service
+    ├── Workspace: Frontend Team
+    │   └── Project: Web App
+    └── Workspace: Infrastructure
+        ├── Project: Monitoring
+        └── Project: Logging
+    ```
+  </Tab>
+  <Tab title="By Product">
+    ```
+    Organization: Acme Corp
+    ├── Workspace: Product A
+    │   ├── Project: API
+    │   └── Project: Web
+    └── Workspace: Product B
+        ├── Project: API
+        └── Project: Mobile Backend
+    ```
+  </Tab>
+</Tabs>
+
+## Creating a Workspace
+
+<Steps>
+  <Step title="Navigate to your organization">
+    From the dashboard, select the organization where you want to create a workspace.
+  </Step>
+  <Step title="Click 'New Workspace'">
+    Click the **New Workspace** button.
+  </Step>
+  <Step title="Enter workspace details">
+    - **Name**: A descriptive name for the workspace (e.g., "Production", "Backend Team")
+    - **Slug**: Auto-generated URL identifier
+    - **Description** (optional): Describe the purpose of this workspace
+  </Step>
+  <Step title="Create">
+    Click **Create** to set up your workspace. You'll automatically become an admin.
+  </Step>
+</Steps>
+
+## Workspace Roles
+
+Workspace permissions are independent from organization roles. A member of an organization must be explicitly invited to a workspace to access its projects.
+
+| Role | Permissions |
+|------|-------------|
+| **Admin** | Full control over the workspace, including managing members and deleting projects |
+| **Editor** | Can create, modify, and delete deployments. Cannot manage workspace settings or members. |
+| **Viewer** | Read-only access. Can view deployments and logs but cannot make changes. |
+
+<Note>
+  Organization admins and owners can access all workspaces by default, but regular organization members must be explicitly invited to each workspace.
+</Note>
+
+## Managing Workspace Members
+
+### Inviting Members
+
+<Steps>
+  <Step title="Open workspace settings">
+    Navigate to your workspace and click **Settings** or the members tab.
+  </Step>
+  <Step title="Invite a member">
+    Select an organization member to invite, or enter an email for someone not yet in the organization.
+  </Step>
+  <Step title="Assign a role">
+    Choose the appropriate workspace role (Admin, Editor, or Viewer).
+  </Step>
+</Steps>
+
+### Updating Member Roles
+
+You can change a member's role at any time:
+
+1. Go to the workspace members list
+2. Click on the member's current role
+3. Select the new role from the dropdown
+
+### Removing Members
+
+To remove someone from a workspace:
+
+1. Find them in the members list
+2. Click the remove button
+3. Confirm the removal
+
+<Note>
+  Removing someone from a workspace doesn't remove them from the organization. They can be re-invited to the workspace later.
+</Note>
+
+## Workspace Settings
+
+### Basic Information
+
+Update your workspace's:
+
+- **Name**: The display name
+- **Description**: Purpose or scope of the workspace
+- **Slug**: URL-friendly identifier (changing this will update all URLs)
+
+### Deleting a Workspace
+
+<Warning>
+  Deleting a workspace will permanently remove all projects, deployments, services, and data within it. This cannot be undone.
+</Warning>
+
+To delete a workspace:
+
+1. Go to workspace settings
+2. Scroll to the danger zone
+3. Click **Delete Workspace**
+4. Confirm by typing the workspace name
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Separate environments with workspaces">
+    Use different workspaces for production, staging, and development to prevent accidental changes to production.
+  </Accordion>
+  <Accordion title="Use meaningful names">
+    Name workspaces clearly so team members know their purpose at a glance.
+  </Accordion>
+  <Accordion title="Limit admin access">
+    Only grant admin roles to people who need to manage the workspace structure. Most developers should be editors.
+  </Accordion>
+  <Accordion title="Use viewers for read-only access">
+    Give the viewer role to stakeholders who need to monitor deployments but shouldn't make changes.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Projects" icon="cube" href="/concepts/projects">
+    Learn how to create and manage projects
+  </Card>
+  <Card title="Deployments" icon="rocket" href="/deployments/overview">
+    Deploy your first application
+  </Card>
+</CardGroup>

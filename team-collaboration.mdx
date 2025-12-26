@@ -1,0 +1,309 @@
+---
+title: Team Collaboration
+description: Invite team members and manage access with role-based permissions.
+---
+
+Orchard provides comprehensive team collaboration features. You can invite team members to organizations and workspaces, each with specific roles that control what they can access and modify.
+
+## Permission Hierarchy
+
+Orchard uses a two-level permission system:
+
+```
+Organization Level
+├── Owner (full control)
+├── Admin (manage members and settings)
+└── Member (basic access)
+
+Workspace Level
+├── Admin (full workspace control)
+├── Editor (create and modify deployments)
+└── Viewer (read-only access)
+```
+
+## Organization Roles
+
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| **Owner** | Full organization control | All permissions, including deletion |
+| **Admin** | Organization management | Manage members, settings, workspaces |
+| **Member** | Basic membership | Access invited workspaces only |
+
+<Note>
+  Organization members must be explicitly invited to workspaces. Being an organization member doesn't automatically grant workspace access (except for admins and owners).
+</Note>
+
+## Workspace Roles
+
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| **Admin** | Full workspace control | Manage members, all projects, settings |
+| **Editor** | Active contributor | Create, modify, delete deployments |
+| **Viewer** | Read-only access | View deployments, logs, and settings |
+
+## Inviting to an Organization
+
+<Steps>
+  <Step title="Navigate to your organization">
+    Open the organization you want to manage.
+  </Step>
+  <Step title="Go to Members">
+    Click on **Members** or **Settings** → **Members**.
+  </Step>
+  <Step title="Click 'Invite Member'">
+    Click the invite button.
+  </Step>
+  <Step title="Enter details">
+    - **Email**: The person's email address
+    - **Role**: Choose Owner, Admin, or Member
+  </Step>
+  <Step title="Send invitation">
+    Click **Invite**. They'll receive an email with a link to join.
+  </Step>
+</Steps>
+
+### Invitation Expiry
+
+Organization invitations expire after **7 days**. If an invitation expires:
+
+1. Go to the pending invitations list
+2. Click **Resend** to send a new invitation
+
+### Pending Invitations
+
+You can view and manage pending invitations:
+
+- **View pending**: See all invitations that haven't been accepted
+- **Resend**: Send a new email for expired or missed invitations
+- **Cancel**: Revoke an invitation before it's accepted
+
+## Inviting to a Workspace
+
+<Steps>
+  <Step title="Navigate to your workspace">
+    Open the workspace you want to manage.
+  </Step>
+  <Step title="Go to Members">
+    Click on **Members** in the workspace settings.
+  </Step>
+  <Step title="Invite a member">
+    Select an organization member or enter an email address.
+  </Step>
+  <Step title="Choose a role">
+    Select Admin, Editor, or Viewer.
+  </Step>
+  <Step title="Send invitation">
+    The member will be notified and can access the workspace immediately.
+  </Step>
+</Steps>
+
+## Accepting Invitations
+
+### From Email
+
+<Steps>
+  <Step title="Check your email">
+    Open the invitation email from Orchard.
+  </Step>
+  <Step title="Click 'Accept Invitation'">
+    Click the link in the email.
+  </Step>
+  <Step title="Sign in or create account">
+    If you don't have an Orchard account, you'll be prompted to create one.
+  </Step>
+  <Step title="Access granted">
+    You'll be redirected to the organization or workspace.
+  </Step>
+</Steps>
+
+### From Dashboard
+
+If you're already signed in and have pending invitations:
+
+<Steps>
+  <Step title="View pending invitations">
+    A modal will appear showing your pending invitations when you log in.
+  </Step>
+  <Step title="Review invitation details">
+    See who invited you and what role you'll have.
+  </Step>
+  <Step title="Accept or decline">
+    Click **Accept** to join or **Decline** to reject the invitation.
+  </Step>
+</Steps>
+
+## Managing Members
+
+### Changing Roles
+
+To change a member's role:
+
+<Steps>
+  <Step title="Go to Members">
+    Open the organization or workspace member list.
+  </Step>
+  <Step title="Find the member">
+    Locate the member whose role you want to change.
+  </Step>
+  <Step title="Update role">
+    Click on their current role and select a new one.
+  </Step>
+</Steps>
+
+### Removing Members
+
+To remove a member:
+
+<Steps>
+  <Step title="Go to Members">
+    Open the organization or workspace member list.
+  </Step>
+  <Step title="Find the member">
+    Locate the member you want to remove.
+  </Step>
+  <Step title="Remove">
+    Click the remove button and confirm.
+  </Step>
+</Steps>
+
+<Note>
+  Removing a member from an organization also removes them from all workspaces in that organization.
+</Note>
+
+<Warning>
+  Organization owners cannot be removed. To change ownership, the owner must transfer it to another admin first.
+</Warning>
+
+## Permission Details
+
+### What Each Role Can Do
+
+<Tabs>
+  <Tab title="Organization Owner">
+    - All admin permissions
+    - Delete the organization
+    - Transfer ownership
+    - Cannot be removed
+  </Tab>
+  <Tab title="Organization Admin">
+    - View and manage all workspaces
+    - Invite and remove members
+    - Create and delete workspaces
+    - Update organization settings
+  </Tab>
+  <Tab title="Organization Member">
+    - View organization details
+    - Access workspaces they're invited to
+    - Cannot manage organization settings
+  </Tab>
+  <Tab title="Workspace Admin">
+    - Full control over the workspace
+    - Invite and remove workspace members
+    - Create and delete projects
+    - All editor permissions
+  </Tab>
+  <Tab title="Workspace Editor">
+    - Create, update, and delete deployments
+    - Manage services and ingresses
+    - View logs and build history
+    - Cannot manage workspace members
+  </Tab>
+  <Tab title="Workspace Viewer">
+    - View all deployments and configurations
+    - View logs and metrics
+    - Cannot make any changes
+  </Tab>
+</Tabs>
+
+## Transfer Ownership
+
+To transfer organization ownership:
+
+<Steps>
+  <Step title="Go to organization settings">
+    Navigate to **Settings** → **Danger Zone**.
+  </Step>
+  <Step title="Transfer ownership">
+    Click **Transfer Ownership**.
+  </Step>
+  <Step title="Select new owner">
+    Choose an admin to become the new owner.
+  </Step>
+  <Step title="Confirm">
+    Confirm the transfer. You'll be demoted to admin.
+  </Step>
+</Steps>
+
+<Warning>
+  Ownership transfer is immediate and cannot be undone without the new owner's consent.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use least privilege">
+    Give members the minimum role needed for their tasks. Start with Viewer and upgrade as needed.
+  </Accordion>
+  <Accordion title="Separate environments">
+    Use different workspaces for production and staging. Give broader access to staging and restrict production.
+  </Accordion>
+  <Accordion title="Review access regularly">
+    Periodically review member lists and remove people who no longer need access.
+  </Accordion>
+  <Accordion title="Use descriptive workspace names">
+    Name workspaces clearly (Production, Staging, Development) so access decisions are obvious.
+  </Accordion>
+  <Accordion title="Document role assignments">
+    Keep a record of why certain people have elevated access for audit purposes.
+  </Accordion>
+</AccordionGroup>
+
+## Email Notifications
+
+Members receive email notifications for:
+
+- Organization invitations
+- Workspace invitations
+- Role changes
+- Removal from organization or workspace
+
+<Note>
+  Email notifications are sent automatically. Make sure members check their spam folder if they don't receive invitations.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Invitation not received">
+    If someone doesn't receive their invitation:
+
+    1. Check their spam folder
+    2. Verify the email address is correct
+    3. Resend the invitation from pending invitations
+    4. Have them check pending invitations in their dashboard
+  </Accordion>
+  <Accordion title="Can't access workspace">
+    If a member can't access a workspace:
+
+    1. Verify they're invited to the specific workspace
+    2. Check their workspace role
+    3. Ensure they've accepted the organization invitation first
+  </Accordion>
+  <Accordion title="Can't remove owner">
+    Organization owners cannot be removed. To change ownership:
+
+    1. Have the owner transfer ownership to another admin
+    2. Then the former owner can be removed or have their role changed
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Organizations" icon="building" href="/concepts/organizations">
+    Learn more about organization management
+  </Card>
+  <Card title="Workspaces" icon="folder" href="/concepts/workspaces">
+    Understand workspace structure and permissions
+  </Card>
+</CardGroup>

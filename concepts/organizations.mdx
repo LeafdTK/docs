@@ -1,0 +1,139 @@
+---
+title: Organizations
+description: Organizations are the top-level container for all your Orchard resources.
+---
+
+Organizations are the root of Orchard's resource hierarchy. They represent your team, company, or personal account and contain all your workspaces, projects, and deployments.
+
+<Note>
+  Orchard is currently in **closed beta**. Organizations are created by the Hack Club team, and you need an invitation to join one.
+</Note>
+
+## What is an Organization?
+
+An organization is a container that:
+
+- Groups all related workspaces and projects together
+- Manages team membership and roles
+- Provides a unique slug for URL identification
+- Can have an avatar and description for identification
+
+## Organization Hierarchy
+
+```
+Organization (e.g., "Acme Corp")
+├── Workspace (e.g., "Production")
+│   ├── Project (e.g., "API")
+│   └── Project (e.g., "Web App")
+└── Workspace (e.g., "Staging")
+    └── Project (e.g., "API")
+```
+
+## Joining an Organization
+
+During the closed beta, you need an invitation to join an organization.
+
+<Steps>
+  <Step title="Receive an invitation">
+    An organization admin will send you an invitation via email.
+  </Step>
+  <Step title="Click the invitation link">
+    Open the email and click **Accept Invitation**.
+  </Step>
+  <Step title="Sign in or create account">
+    If you don't have an account, you'll be prompted to create one.
+  </Step>
+  <Step title="Access granted">
+    You'll be added to the organization with the role specified in the invitation.
+  </Step>
+</Steps>
+
+## Organization Roles
+
+Members of an organization can have one of three roles:
+
+| Role | Permissions |
+|------|-------------|
+| **Owner** | Full control over the organization, including deletion. Cannot be removed. |
+| **Admin** | Can manage members, workspaces, and settings. Cannot delete the organization. |
+| **Member** | Can access workspaces they've been invited to. Cannot manage organization settings. |
+
+## Managing Members
+
+### Inviting Members
+
+<Steps>
+  <Step title="Open organization settings">
+    Navigate to your organization and click **Settings** or the members section.
+  </Step>
+  <Step title="Click 'Invite Member'">
+    Enter the email address of the person you want to invite.
+  </Step>
+  <Step title="Select a role">
+    Choose the appropriate role (Owner, Admin, or Member).
+  </Step>
+  <Step title="Send invitation">
+    The invited person will receive an email with a link to join. Invitations expire after 7 days.
+  </Step>
+</Steps>
+
+### Managing Existing Members
+
+From the members list, you can:
+
+- **Change roles**: Click on a member's role to update it
+- **Remove members**: Click the remove button to revoke access (owners cannot be removed)
+- **View pending invitations**: See and resend invitations that haven't been accepted
+
+<Note>
+  Removing a member from an organization also removes them from all workspaces within that organization.
+</Note>
+
+## Organization Settings
+
+### Basic Information
+
+You can update your organization's:
+
+- **Name**: The display name of your organization
+- **Description**: A brief description visible to members
+- **Avatar**: Upload an image (JPEG, PNG, GIF, or WebP, max 5MB)
+
+### Danger Zone
+
+From the organization settings, you can also:
+
+- **Transfer ownership**: Assign another admin as the owner
+- **Delete organization**: Permanently remove the organization and all its contents
+
+<Warning>
+  Deleting an organization is permanent and will remove all workspaces, projects, deployments, and data within it. This action cannot be undone.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use one organization per team or company">
+    Keep all related projects within a single organization for easier access management and billing.
+  </Accordion>
+  <Accordion title="Use descriptive names">
+    Choose clear, recognizable names for your organization that team members will easily identify.
+  </Accordion>
+  <Accordion title="Set up roles appropriately">
+    Only grant admin or owner roles to people who need to manage the organization structure. Most team members should be regular members.
+  </Accordion>
+  <Accordion title="Use workspaces for environment separation">
+    Instead of creating separate organizations for staging and production, use workspaces within a single organization.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Workspaces" icon="folder" href="/concepts/workspaces">
+    Learn how to organize projects within workspaces
+  </Card>
+  <Card title="Team Collaboration" icon="users" href="/team-collaboration">
+    Invite and manage team members
+  </Card>
+</CardGroup>
